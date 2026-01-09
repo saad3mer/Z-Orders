@@ -242,20 +242,41 @@ function searchOrder() {
 
 // تحديث جدول كل الأرقام
 function updateOrdersTable() {
-  const tbody = document.getElementById("ordersTable").querySelector("tbody");
-  tbody.innerHTML = "";
-  for(let i=0; i<localStorage.length; i++){
-    const key = localStorage.key(i);
-    if(key.startsWith("Z-")) {
-      const data = JSON.parse(localStorage.getItem(key));
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${key}</td><td>${data.amount}</td><td class="date-time">${data.date}</td>`;
-      tbody.appendChild(tr);
+    const tbody = document.getElementById("ordersTable").querySelector("tbody");
+    tbody.innerHTML = "";
+
+    let orders = [];
+
+    // تجميع كل أرقام الأوامر
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        if (key.startsWith("Z-")) {
+            const data = JSON.parse(localStorage.getItem(key));
+
+            orders.push({
+                order: key,
+                amount: data.amount,
+                date: data.date
+            });
+        }
     }
-  }
+
+    // ترتيب تنازلي → آخر رقم فوق
+    orders.sort((a, b) => b.order.localeCompare(a.order));
+
+    // عرض الجدول
+    orders.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${item.order}</td>
+            <td>${item.amount}</td>
+            <td class="date-time">${item.date}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
-updateOrdersTable();
     
     // Enter لتوليد رقم أمر من خانة المبلغ
 document.getElementById("amount").addEventListener("keydown", function(e) {
@@ -275,4 +296,5 @@ document.getElementById("searchInput").addEventListener("keydown", function(e) {
 
 </body>
 </html>
+
 
