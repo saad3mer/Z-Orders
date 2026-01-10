@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Z-Orders Tracker</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <style>
 body { font-family: Arial; direction: rtl; background: #eef2f7; padding: 20px; }
 .container { max-width: 1200px; margin: auto; }
@@ -51,10 +52,15 @@ tr:nth-child(even) { background-color: #f2f2f2; }
 </div>
 
 <h3 style="margin-top:30px;">📋 كل الأرقام المسجلة</h3>
+<label>فلتر حسب التاريخ:</label>
+<input type="date" id="filterDate">
+<button onclick="filterByDate()">اعرض العمليات</button>
+<div class="total" id="filteredTotal" style="margin-top:10px;"></div>
+
 <div style="display:flex; gap:10px; margin-bottom:10px;">
-    <input type="file" id="importFile" accept=".json">
-    <button onclick="importOrders()">استيراد</button>
-    <button onclick="exportOrders()">تصدير</button>
+    <input type="file" id="importFile" accept=".xlsx">
+    <button onclick="importOrders()">استيراد Excel</button>
+    <button onclick="exportToExcel()">تصدير Excel</button>
 </div>
 
 <div class="table-wrapper">
@@ -66,8 +72,7 @@ tr:nth-child(even) { background-color: #f2f2f2; }
             <th>التاريخ والوقت</th>
         </tr>
     </thead>
-    <tbody>
-    </tbody>
+    <tbody></tbody>
 </table>
 </div>
 </div>
@@ -162,54 +167,84 @@ function searchOrder(){
         updateOrdersTable();
         return;
     }
-    for(let i=0;i<localStorage.length;i++){
-        const key = localStorage.key(i);
-        if(key===val){
-            const data = JSON.parse(localStorage.getItem(key));
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${key}</td><td>${data.amount}</td><td class="date-time">${data.date}</td>`;
-            tbody.appendChild(tr);
-            return;
-        }
+    if(localStorage.getItem(val)){
+        const data = JSON.parse(localStorage.getItem(val));
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${val}</td><td>${data.amount}</td><td class="date-time">${data.date}</td>`;
+        tbody.appendChild(tr);
+    } else {
+        tbody.innerHTML = `<tr><td colspan="3">❌ الرقم غير موجود</td></tr>`;
     }
-    tbody.innerHTML = `<tr><td colspan="3">❌ الرقم غير موجود</td></tr>`;
 }
 
-// Import / Export
-function exportOrders(){
-    let ordersArr = [];
-    for(let i=0;i<localStorage.length;i++){
+// فلتر حسب التاريخ + مجموع المبالغ
+function filterByDate() {
+    const selectedDate = document.getElementById("filterDate").value;
+    const tbody = document.getElementById("ordersTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    let totalAmount = 0;
+
+    if(!selectedDate){
+        updateOrdersTable();
+        document.getElementById("filteredTotal").textContent = "";
+        return;
+    }
+
+    for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if(key.startsWith("Z-")){
             const data = JSON.parse(localStorage.getItem(key));
-            ordersArr.push({order:key, amount:data.amount, date:data.date});
+            const orderDate = new Date(data.date).toISOString().slice(0,10);
+            if(orderDate === selectedDate){
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${key}</td><td>${data.amount}</td><td class="date-time">${data.date}</td>`;
+                tbody.appendChild(tr);
+                totalAmount += parseFloat(data.amount);
+            }
         }
     }
-    const blob = new Blob([JSON.stringify(ordersArr,null,2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "orders.json";
-    a.click();
-    URL.revokeObjectURL(url);
+
+    document.getElementById("filteredTotal").textContent = "مجموع المبالغ: " + totalAmount;
 }
 
+// تصدير Excel
+function exportToExcel(){
+    let ordersArr = [];
+    for(let i=0; i<localStorage.length; i++){
+        const key = localStorage.key(i);
+        if(key.startsWith("Z-")){
+            const data = JSON.parse(localStorage.getItem(key));
+            ordersArr.push({ "رقم الأمر": key, "المبلغ": data.amount, "التاريخ والوقت": data.date });
+        }
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(ordersArr);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+    XLSX.writeFile(workbook, "Z-Orders.xlsx");
+}
+
+// استيراد Excel
 function importOrders(){
     const fileInput = document.getElementById("importFile");
     const file = fileInput.files[0];
     if(!file) return;
+
     const reader = new FileReader();
     reader.onload = function(e){
-        try{
-            const imported = JSON.parse(e.target.result);
-            imported.forEach(o=>{
-                localStorage.setItem(o.order, JSON.stringify({amount:o.amount,date:o.date}));
-            });
-            updateOrdersTable();
-            alert("✅ تم استيراد البيانات");
-        }catch(err){ alert("❌ خطأ في الملف"); }
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type:"array"});
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(firstSheet);
+        rows.forEach(r=>{
+            if(r["رقم الأمر"] && r["المبلغ"] && r["التاريخ والوقت"]){
+                localStorage.setItem(r["رقم الأمر"], JSON.stringify({amount:r["المبلغ"], date:r["التاريخ والوقت"]}));
+            }
+        });
+        updateOrdersTable();
+        alert("✅ تم استيراد البيانات من Excel");
     };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
 }
 
 // Enter لتوليد الرقم
