@@ -2,153 +2,54 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>مولد رقم أمر</title>
+<title>Z-Orders Tracker</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <style>
-body { 
-    font-family: Arial, sans-serif; 
-    direction: rtl; 
-    background: #eef2f7; 
-    padding: 20px; 
-}
-
-.container {
-    max-width: 1200px;
-    margin: auto;
-}
-
-.box { 
-    background: #fff; 
-    padding: 30px; 
-    border-radius: 12px; 
-    margin-bottom: 20px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
+body { font-family: Arial; direction: rtl; background: #eef2f7; padding: 20px; }
+.container { max-width: 1200px; margin: auto; }
+.box { background: #fff; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
 h3 { text-align: center; color: #333; margin-bottom: 20px; }
-
 label { display:block; margin-top:15px; font-weight: bold; color: #555; }
-input { 
-    width: 100%; 
-    padding: 12px; 
-    margin-top:5px; 
-    border-radius: 6px; 
-    border: 1px solid #ccc; 
-    font-size: 14px;
-    transition: border 0.3s;
-}
+input { width: 100%; padding: 12px; margin-top:5px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; transition: border 0.3s; }
 input:focus { border-color: #4CAF50; outline: none; }
-
-button { 
-    padding: 12px; 
-    cursor: pointer; 
-    font-size: 16px; 
-    border-radius: 8px; 
-    border: none; 
-    background-color: #4CAF50; 
-    color: white;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-button:active {
-    transform: scale(0.95);
-    opacity: 0.8;
-}
-
-.generate-btn { width: calc(50% - 5px); }
-.copy-btn { width: calc(50% - 5px); background-color: #2196F3; }
+button { padding: 12px; cursor: pointer; font-size: 16px; border-radius: 8px; border: none; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s ease; }
+button:active { transform: scale(0.95); opacity: 0.8; }
+.generate-btn { width: calc(50% - 5px); background-color: #4CAF50; color: white; }
+.copy-btn { width: calc(50% - 5px); background-color: #2196F3; color: white; }
 .copy-btn:hover { background-color: #0b7dda; }
-
-.search-container {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-
+.search-container { display: flex; gap: 10px; margin-top: 15px; }
 .search-container input { flex: 1; }
-.search-container button { flex: 0 0 150px; }
-
-.table-wrapper {
-    max-height: 600px;
-    overflow-y: auto;
-    margin-top: 20px;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    table-layout: fixed;
-}
-table, th, td {
-    border: 1px solid #ccc;
-}
-th, td {
-    padding: 12px;
-    text-align: center;
-}
-th {
-    background-color: #4CAF50;
-    color: white;
-}
+.search-container button { flex: 0 0 150px; background-color:#FF9800; color:white; border-radius:6px; }
+.table-wrapper { max-height: 600px; overflow-y: auto; margin-top: 20px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+table, th, td { border: 1px solid #ccc; }
+th, td { padding: 12px; text-align: center; }
+th { background-color: #4CAF50; color: white; }
 tr:nth-child(even) { background-color: #f2f2f2; }
-
-.date-time {
-    white-space: nowrap;
-}
-
-/* نافذة ظهور الرقم */
-.order-popup {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background-color: #4CAF50;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.5s ease;
-    z-index: 1000;
-}
-
-.order-popup.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
+.date-time { white-space: nowrap; }
+.order-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px); background-color: #4CAF50; color: white; padding: 15px 25px; border-radius: 10px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: all 0.5s ease; z-index: 1000; }
+.order-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.last-order { background-color: #FFF59D !important; font-weight:bold; }
 </style>
 </head>
 <body>
 
 <div class="container">
-
-<!-- صندوق توليد رقم -->
 <div class="box">
 <h3>🔢 توليد رقم أمر</h3>
-
 <label>المبلغ:</label>
 <input id="amount" placeholder="المبلغ">
-
 <div style="display:flex; gap:10px; margin-top:10px;">
     <button class="generate-btn" onclick="generateOrder()"><i class="fa fa-plus"></i> توليد رقم جديد</button>
     <button class="copy-btn" onclick="copyOrder()"><i class="fa fa-copy"></i> نسخ رقم الأمر</button>
 </div>
 
-<!-- البحث -->
 <h3 style="margin-top:30px;">🔍 بحث عن عملية</h3>
 <div class="search-container">
     <input id="searchInput" placeholder="اكتب رقم الأمر">
     <button onclick="searchOrder()"><i class="fa fa-search"></i> بحث</button>
 </div>
 
-<!-- جدول الأوامر -->
 <h3 style="margin-top:30px;">📋 كل الأرقام المسجلة</h3>
 <div class="table-wrapper">
 <table id="ordersTable">
@@ -163,14 +64,14 @@ tr:nth-child(even) { background-color: #f2f2f2; }
     </tbody>
 </table>
 </div>
-
 </div>
 
-<!-- نافذة ظهور الرقم -->
 <div id="orderPopup" class="order-popup"></div>
 
 <script>
 let lastOrderNumber = ""; 
+
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzIsr-QZ_xZmdwFIKQONdgE2P-LE7yX_ODtIP0bXj8lcoKqXgiijyhnuy_al06we_GV/exec";
 
 function getToday() {
   const d = new Date();
@@ -179,9 +80,17 @@ function getToday() {
          String(d.getDate()).padStart(2,'0');
 }
 
+function addOrderToSheet(orderNumber, amount, dateTime){
+  const body = new URLSearchParams({ orderNumber, amount, dateTime });
+  fetch(SHEET_URL, { method: "POST", body })
+    .then(res => res.text())
+    .then(res => console.log("تم حفظ الرقم:", res))
+    .catch(err => console.error("خطأ في حفظ الرقم:", err));
+}
+
 function generateOrder() {
   const amount = document.getElementById("amount").value.trim();
-  if(!amount) { alert("من فضلك املأ خانة المبلغ"); return; }
+  if(!amount || isNaN(amount)) { alert("من فضلك املأ خانة المبلغ برقم صحيح"); return; }
 
   const today = getToday();
   const key = "orders_" + today;
@@ -195,11 +104,11 @@ function generateOrder() {
   const data = { amount: amount, date: new Date().toLocaleString() };
   localStorage.setItem(orderNumber, JSON.stringify(data));
 
+  addOrderToSheet(orderNumber, amount, data.date);
+
   document.getElementById("amount").value = "";
-
   showOrderPopup(orderNumber);
-
-  updateOrdersTable();
+  loadOrdersFromSheet();
 }
 
 function showOrderPopup(orderNumber) {
@@ -218,7 +127,6 @@ function copyOrder() {
   navigator.clipboard.writeText(lastOrderNumber);
   hideOrderPopup();
 
-  // أنيميشن قصير لزر النسخ
   const btn = document.querySelector(".copy-btn");
   btn.innerHTML = '<i class="fa fa-check"></i> تم النسخ';
   setTimeout(()=>{ btn.innerHTML = '<i class="fa fa-copy"></i> نسخ رقم الأمر'; }, 1000);
@@ -226,75 +134,60 @@ function copyOrder() {
 
 function searchOrder() {
   const val = document.getElementById("searchInput").value.trim();
+  if(!val) return loadOrdersFromSheet();
+
   const tbody = document.getElementById("ordersTable").querySelector("tbody");
-  tbody.innerHTML = ""; // نفرغ الجدول
-  if(val && localStorage.getItem(val)) {
-    const data = JSON.parse(localStorage.getItem(val));
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${val}</td><td>${data.amount}</td><td class="date-time">${data.date}</td>`;
-    tbody.appendChild(tr);
-  } else if(val) {
-    alert("❌ الرقم غير موجود");
-  } else {
-    updateOrdersTable();
-  }
-}
+  tbody.innerHTML = "";
 
-// تحديث جدول كل الأرقام
-function updateOrdersTable() {
-    const tbody = document.getElementById("ordersTable").querySelector("tbody");
-    tbody.innerHTML = "";
-
-    let orders = [];
-
-    // تجميع كل أرقام الأوامر
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-
-        if (key.startsWith("Z-")) {
-            const data = JSON.parse(localStorage.getItem(key));
-
-            orders.push({
-                order: key,
-                amount: data.amount,
-                date: data.date
-            });
-        }
+  loadOrdersFromSheet().then(()=>{
+    for(const row of tbody.querySelectorAll("tr")){
+      if(!row.children[0].textContent.includes(val)){
+        row.style.display = "none";
+      }
     }
-
-    // ترتيب تنازلي → آخر رقم فوق
-    orders.sort((a, b) => b.order.localeCompare(a.order));
-
-    // عرض الجدول
-    orders.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${item.order}</td>
-            <td>${item.amount}</td>
-            <td class="date-time">${item.date}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+  });
 }
 
-    
-    // Enter لتوليد رقم أمر من خانة المبلغ
+async function loadOrdersFromSheet() {
+  const res = await fetch(SHEET_URL);
+  const raw = await res.json();
+
+  const rows = raw.slice(1); // تجاهل الصف الأول (العناوين)
+  const orders = rows
+    .filter(r => r[0] && r[0].startsWith("Z-"))
+    .map(r => ({ order: r[0], amount: r[1], date: r[2] }));
+
+  orders.sort((a,b) => b.order.localeCompare(a.order));
+
+  const tbody = document.getElementById("ordersTable").querySelector("tbody");
+  tbody.innerHTML = "";
+
+  orders.forEach((item,index)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+          <td>${item.order}</td>
+          <td>${item.amount}</td>
+          <td class="date-time">${item.date}</td>
+      `;
+      if(index===0) tr.classList.add("last-order");
+      tbody.appendChild(tr);
+  });
+}
+
+// تشغيل عند تحميل الصفحة
+window.addEventListener("load", () => {
+  loadOrdersFromSheet();
+});
+
+// Enter لتوليد رقم
 document.getElementById("amount").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        generateOrder();
-    }
+    if(e.key === "Enter") generateOrder();
 });
 
-// Enter للبحث عن عملية من خانة البحث
+// Enter للبحث
 document.getElementById("searchInput").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        searchOrder();
-    }
+    if(e.key === "Enter") searchOrder();
 });
-
 </script>
-
 </body>
 </html>
-
-
