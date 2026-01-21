@@ -33,6 +33,11 @@ button {
     justify-content: center;
     align-items: center;
     gap: 8px;
+    transition: 0.2s; /* حافظ على الانيميشن الطبيعي */
+}
+
+button:active {
+    transform: scale(0.96); /* حركة ضغط لطيفة */
 }
 
 .generate-btn { width: 50%; background:#4CAF50; color:#fff; }
@@ -156,6 +161,9 @@ function generateOrder(){
     document.getElementById("amount").value = "";
     showPopup(orderNumber);
     updateOrdersTable();
+
+    // نسخ الرقم تلقائي بدون popup
+    navigator.clipboard.writeText(orderNumber);
 }
 
 function showPopup(num){
@@ -168,6 +176,7 @@ function showPopup(num){
 function copyOrder(){
     if(!lastOrderNumber) return;
     navigator.clipboard.writeText(lastOrderNumber);
+    // بدون أي popup، الأنيميشن الزرار نفسه يفضل شغال
 }
 
 function updateOrdersTable(){
@@ -246,7 +255,7 @@ function importOrders(){
     reader.readAsArrayBuffer(file);
 }
 
-// تفعيل زر Enter لتوليد رقم الأمر
+// تفعيل زر Enter لتوليد الرقم ونسخه تلقائي
 document.getElementById("amount").addEventListener("keydown", function(e){
     if(e.key === "Enter"){
         generateOrder();
