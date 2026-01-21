@@ -125,9 +125,9 @@ let lastOrderNumber = "";
 
 function getToday(){
     const d = new Date();
-    return d.getFullYear().toString() +
+    return d.getFullYear().toString().slice(2) + // YY
            String(d.getMonth()+1).padStart(2,'0') +
-           String(d.getDate()).padStart(2,'0');
+           String(d.getDate()).padStart(2,'0'); // MMDD
 }
 
 function generateOrder(){
@@ -140,7 +140,12 @@ function generateOrder(){
     count = count ? parseInt(count) + 1 : 1;
     localStorage.setItem(counterKey, count);
 
-    const orderNumber = today + String(count).padStart(6,'0');
+    const now = new Date();
+    const orderNumber = today +
+        String(now.getHours()).padStart(2,'0') +
+        String(now.getMinutes()).padStart(2,'0') +
+        count;
+
     lastOrderNumber = orderNumber;
 
     localStorage.setItem(orderNumber, JSON.stringify({
@@ -240,6 +245,13 @@ function importOrders(){
     };
     reader.readAsArrayBuffer(file);
 }
+
+// تفعيل زر Enter لتوليد رقم الأمر
+document.getElementById("amount").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+        generateOrder();
+    }
+});
 
 updateOrdersTable();
 </script>
