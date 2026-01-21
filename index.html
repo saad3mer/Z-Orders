@@ -3,15 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <title>Z-Orders Tracker</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
 <style>
 body { font-family: Arial; direction: rtl; background: #eef2f7; padding: 20px; }
 .container { max-width: 1200px; margin: auto; }
 .box { background: #fff; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+
 h3 { text-align: center; color: #333; margin-bottom: 20px; }
-input { width: 100%; padding: 12px; margin-top:5px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; transition: border 0.3s; }
-input:focus { border-color: #4CAF50; outline: none; }
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top:5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
 
 button {
     padding: 12px 20px;
@@ -23,47 +33,59 @@ button {
     justify-content: center;
     align-items: center;
     gap: 8px;
-    transition: all 0.2s ease;
 }
-button:active { transform: scale(0.95); opacity: 0.8; }
 
-.generate-btn { width: calc(50% - 5px); background-color: #4CAF50; color: white; }
-.copy-btn { width: calc(50% - 5px); background-color: #2196F3; color: white; }
-.copy-btn:hover { background-color: #0b7dda; }
+.generate-btn { width: 50%; background:#4CAF50; color:#fff; }
+.copy-btn { width: 50%; background:#2196F3; color:#fff; }
 
-.search-container { display: flex; gap: 10px; margin-top: 15px; }
-.search-container input { flex: 1; }
-.search-container button { flex: 0 0 150px; background-color:#FF9800; color:white; border-radius:6px; }
+.search-container { display:flex; gap:10px; margin-top:15px; }
+.search-container button { background:#FF9800; color:#fff; }
 
-.table-wrapper { max-height: 600px; overflow-y: auto; margin-top: 20px; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-table, th, td { border: 1px solid #ccc; }
-th, td { padding: 12px; text-align: center; }
-th { background-color: #4CAF50; color: white; }
-tr:nth-child(even) { background-color: #f2f2f2; }
-.date-time { white-space: nowrap; }
+.table-wrapper { max-height: 600px; overflow-y:auto; margin-top:20px; }
 
-.order-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px); background-color: #4CAF50; color: white; padding: 15px 25px; border-radius: 10px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: all 0.5s ease; z-index: 1000; }
-.order-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+table { width:100%; border-collapse:collapse; }
+th,td { border:1px solid #ccc; padding:12px; text-align:center; }
+th { background:#4CAF50; color:#fff; }
+tr:nth-child(even){ background:#f2f2f2; }
 
-.last-order { background-color: #FFF59D !important; font-weight:bold; }
+.last-order { background:#FFF59D !important; font-weight:bold; }
 
-.file-buttons { display:flex; gap:10px; margin-top:10px; justify-content:flex-start; }
-.file-buttons button { background-color:#FF5722; color:white; padding:8px 14px; font-size:14px; border-radius:6px; }
-.file-buttons button:hover { background-color:#E64A19; }
-.file-buttons input[type="file"] { font-size:14px; padding:4px; }
+.order-popup {
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#4CAF50;
+    color:#fff;
+    padding:15px 25px;
+    border-radius:10px;
+    font-size:18px;
+    opacity:0;
+    transition:0.4s;
+    z-index:1000;
+}
+.order-popup.show { opacity:1; }
+
+.file-buttons { display:flex; gap:10px; margin-top:15px; }
+.file-buttons button { background:#FF5722; color:#fff; font-size:14px; padding:8px 14px; }
 </style>
 </head>
+
 <body>
 
 <div class="container">
 <div class="box">
+
 <h3>🔢 Orders</h3>
 <input id="amount" placeholder="ادخل المبلغ">
 
 <div style="display:flex; gap:10px; margin-top:10px;">
-    <button class="generate-btn" onclick="generateOrder()"><i class="fa fa-plus"></i> توليد رقم جديد</button>
-    <button class="copy-btn" onclick="copyOrder()"><i class="fa fa-copy"></i> نسخ رقم الأمر</button>
+    <button class="generate-btn" onclick="generateOrder()">
+        <i class="fa fa-plus"></i> توليد رقم جديد
+    </button>
+    <button class="copy-btn" onclick="copyOrder()">
+        <i class="fa fa-copy"></i> نسخ رقم الأمر
+    </button>
 </div>
 
 <h3 style="margin-top:30px;">🔍 بحث عن عملية</h3>
@@ -72,18 +94,18 @@ tr:nth-child(even) { background-color: #f2f2f2; }
     <button onclick="searchOrder()"><i class="fa fa-search"></i> بحث</button>
 </div>
 
-<h3 style="text-align:center; margin-top:30px;">📋 العمليات المسجلة</h3>
+<h3 style="margin-top:30px;">📋 العمليات المسجلة</h3>
 
 <div class="table-wrapper">
 <table id="ordersTable">
-    <thead>
-        <tr>
-            <th>رقم الأمر</th>
-            <th>المبلغ</th>
-            <th>التاريخ والوقت</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<thead>
+<tr>
+    <th>رقم الأمر</th>
+    <th>المبلغ</th>
+    <th>التاريخ والوقت</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 </div>
 
@@ -94,134 +116,133 @@ tr:nth-child(even) { background-color: #f2f2f2; }
 </div>
 
 </div>
+</div>
 
 <div id="orderPopup" class="order-popup"></div>
 
 <script>
 let lastOrderNumber = "";
 
-function getToday() {
-  const d = new Date();
-  return d.getFullYear().toString() +
-         String(d.getMonth()+1).padStart(2,'0') +
-         String(d.getDate()).padStart(2,'0');
+function getToday(){
+    const d = new Date();
+    return d.getFullYear().toString() +
+           String(d.getMonth()+1).padStart(2,'0') +
+           String(d.getDate()).padStart(2,'0');
 }
 
-function generateOrder() {
+function generateOrder(){
     const amount = document.getElementById("amount").value.trim();
-    if(!amount || isNaN(amount)){ alert("من فضلك ادخل رقم صحيح"); return; }
-    const today = getToday();
-    const key = "orders_" + today;
-    let count = localStorage.getItem(key);
-    count = count ? parseInt(count)+1 : 1;
-    localStorage.setItem(key,count);
+    if(!amount || isNaN(amount)){ alert("ادخل مبلغ صحيح"); return; }
 
-    const orderNumber = `${today}${String(count).padStart(6,'0')}`;
+    const today = getToday();
+    const counterKey = "counter_" + today;
+    let count = localStorage.getItem(counterKey);
+    count = count ? parseInt(count) + 1 : 1;
+    localStorage.setItem(counterKey, count);
+
+    const orderNumber = today + String(count).padStart(6,'0');
     lastOrderNumber = orderNumber;
 
-    const data = { amount: amount, date: new Date().toLocaleString() };
-    localStorage.setItem(orderNumber, JSON.stringify(data));
+    localStorage.setItem(orderNumber, JSON.stringify({
+        amount: amount,
+        date: new Date().toLocaleString()
+    }));
 
     document.getElementById("amount").value = "";
-    showOrderPopup(orderNumber);
+    showPopup(orderNumber);
     updateOrdersTable();
 }
 
-function showOrderPopup(orderNumber) {
-    const popup = document.getElementById("orderPopup");
-    popup.textContent = `رقم الأمر: ${orderNumber}`;
-    popup.classList.add("show");
-    setTimeout(()=>{ popup.classList.remove("show"); },1500);
+function showPopup(num){
+    const p = document.getElementById("orderPopup");
+    p.textContent = "رقم الأمر: " + num;
+    p.classList.add("show");
+    setTimeout(()=>p.classList.remove("show"),1500);
 }
 
 function copyOrder(){
     if(!lastOrderNumber) return;
     navigator.clipboard.writeText(lastOrderNumber);
-    const btn = document.querySelector(".copy-btn");
-    btn.innerHTML = '<i class="fa fa-check"></i> تم النسخ';
-    setTimeout(()=>{ btn.innerHTML = '<i class="fa fa-copy"></i> نسخ رقم الأمر'; },1000);
 }
 
-function updateOrdersTable() {
-    const tbody = document.getElementById("ordersTable").querySelector("tbody");
+function updateOrdersTable(){
+    const tbody = document.querySelector("#ordersTable tbody");
     tbody.innerHTML = "";
     let orders = [];
+
     for(let i=0;i<localStorage.length;i++){
         const key = localStorage.key(i);
-        if(key.startsWith("Z-")){
+        if(!isNaN(key)){
             const data = JSON.parse(localStorage.getItem(key));
             orders.push({order:key, amount:data.amount, date:data.date});
         }
     }
-    orders.sort((a,b)=> b.order.localeCompare(a.order));
-    orders.forEach(item=>{
+
+    orders.sort((a,b)=>b.order.localeCompare(a.order));
+
+    orders.forEach(o=>{
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${item.order}</td><td>${item.amount}</td><td class="date-time">${item.date}</td>`;
-        if(item.order === lastOrderNumber) tr.classList.add("last-order");
+        if(o.order === lastOrderNumber) tr.classList.add("last-order");
+        tr.innerHTML = `<td>${o.order}</td><td>${o.amount}</td><td>${o.date}</td>`;
         tbody.appendChild(tr);
     });
 }
 
 function searchOrder(){
     const val = document.getElementById("searchInput").value.trim();
-    const tbody = document.getElementById("ordersTable").querySelector("tbody");
+    if(!val){ updateOrdersTable(); return; }
+
+    const tbody = document.querySelector("#ordersTable tbody");
     tbody.innerHTML = "";
-    if(!val){
-        updateOrdersTable();
-        return;
-    }
-    if(localStorage.getItem(val)){
-        const data = JSON.parse(localStorage.getItem(val));
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${val}</td><td>${data.amount}</td><td class="date-time">${data.date}</td>`;
-        tbody.appendChild(tr);
+
+    if(!isNaN(val) && localStorage.getItem(val)){
+        const d = JSON.parse(localStorage.getItem(val));
+        tbody.innerHTML = `<tr><td>${val}</td><td>${d.amount}</td><td>${d.date}</td></tr>`;
     } else {
-        tbody.innerHTML = `<tr><td colspan="3">❌ الرقم غير موجود</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3">❌ غير موجود</td></tr>`;
     }
 }
 
 function exportToExcel(){
-    let ordersArr = [];
-    for(let i=0; i<localStorage.length; i++){
+    let arr = [];
+    for(let i=0;i<localStorage.length;i++){
         const key = localStorage.key(i);
-        if(key.startsWith("Z-")){
-            const data = JSON.parse(localStorage.getItem(key));
-            ordersArr.push({ "رقم الأمر": key, "المبلغ": data.amount, "التاريخ والوقت": data.date });
+        if(!isNaN(key)){
+            const d = JSON.parse(localStorage.getItem(key));
+            arr.push({"رقم الأمر":key,"المبلغ":d.amount,"التاريخ والوقت":d.date});
         }
     }
-    const worksheet = XLSX.utils.json_to_sheet(ordersArr);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-    XLSX.writeFile(workbook, "Z-Orders.xlsx");
+    const ws = XLSX.utils.json_to_sheet(arr);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Orders");
+    XLSX.writeFile(wb,"Orders.xlsx");
 }
 
 function importOrders(){
-    const fileInput = document.getElementById("importFile");
-    const file = fileInput.files[0];
+    const file = document.getElementById("importFile").files[0];
     if(!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e){
+    reader.onload = e=>{
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type:"array"});
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(firstSheet);
+        const wb = XLSX.read(data,{type:"array"});
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         rows.forEach(r=>{
-            if(r["رقم الأمر"] && r["المبلغ"] && r["التاريخ والوقت"]){
-                localStorage.setItem(r["رقم الأمر"], JSON.stringify({amount:r["المبلغ"], date:r["التاريخ والوقت"]}));
+            if(r["رقم الأمر"]){
+                localStorage.setItem(r["رقم الأمر"], JSON.stringify({
+                    amount:r["المبلغ"],
+                    date:r["التاريخ والوقت"]
+                }));
             }
         });
         updateOrdersTable();
-        alert("✅ تم استيراد البيانات من Excel");
+        alert("تم الاستيراد ✅");
     };
     reader.readAsArrayBuffer(file);
 }
 
-document.getElementById("amount").addEventListener("keydown", function(e){ if(e.key==="Enter") generateOrder(); });
-document.getElementById("searchInput").addEventListener("keydown", function(e){ if(e.key==="Enter") searchOrder(); });
-
 updateOrdersTable();
 </script>
+
 </body>
 </html>
-
