@@ -265,6 +265,34 @@ document.getElementById("amount").addEventListener("keydown", function(e){
 updateOrdersTable();
 </script>
 
+<script>
+// استقبال الرسائل من الصفحة الأم لتغيير الثيم
+window.addEventListener("message", (event) => {
+    if(event.data.theme){
+        if(event.data.theme === 'dark'){
+            document.documentElement.setAttribute("data-theme","dark");
+        } else {
+            document.documentElement.removeAttribute("data-theme");
+        }
+    }
+});
+
+// طلب الثيم الحالي من الصفحة الرئيسية عند فتح الأداة
+if(window.parent){
+    window.parent.postMessage({requestTheme:true}, '*');
+}
+
+// استجابة لطلب الصفحة الرئيسية (لو فيه requestTheme)
+window.addEventListener("message", (event) => {
+    if(event.data.requestTheme){
+        const isDark = window.parent.document.body.classList.contains('dark');
+        window.parent.postMessage({theme: isDark?'dark':'light'}, '*');
+    }
+});
+</script>
+
+
 </body>
 </html>
+
 
