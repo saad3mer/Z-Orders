@@ -8,11 +8,14 @@
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
 <style>
-body { font-family: Arial; direction: rtl; background: #eef2f7; padding: 20px; }
-.container { max-width: 1200px; margin: auto; }
-.box { background: #fff; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+body { font-family: Arial; direction: rtl; background: #eef2f7; padding: 20px; transition:.3s; color:#111827; }
+body.dark { background:#1f2937; color:#f9fafb; }
 
-h3 { text-align: center; color: #333; margin-bottom: 20px; }
+.container { max-width: 1200px; margin: auto; }
+.box { background: #fff; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition:.3s; }
+body.dark .box { background:#111827; box-shadow:0 6px 16px rgba(0,0,0,0.3); }
+
+h3 { text-align: center; margin-bottom: 20px; }
 
 input {
     width: 100%;
@@ -21,7 +24,9 @@ input {
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 14px;
+    transition:.3s;
 }
+body.dark input { background:#1f2937; border:1px solid #374151; color:#f9fafb; }
 
 button {
     padding: 12px 20px;
@@ -33,25 +38,23 @@ button {
     justify-content: center;
     align-items: center;
     gap: 8px;
-    transition: 0.2s; /* حافظ على الانيميشن الطبيعي */
+    transition: 0.2s;
 }
-
-button:active {
-    transform: scale(0.96); /* حركة ضغط لطيفة */
-}
+button:active { transform: scale(0.96); }
 
 .generate-btn { width: 50%; background:#4CAF50; color:#fff; }
 .copy-btn { width: 50%; background:#2196F3; color:#fff; }
-
 .search-container { display:flex; gap:10px; margin-top:15px; }
 .search-container button { background:#FF9800; color:#fff; }
 
 .table-wrapper { max-height: 600px; overflow-y:auto; margin-top:20px; }
-
 table { width:100%; border-collapse:collapse; }
-th,td { border:1px solid #ccc; padding:12px; text-align:center; }
+th,td { border:1px solid #ccc; padding:12px; text-align:center; transition:.3s; }
 th { background:#4CAF50; color:#fff; }
 tr:nth-child(even){ background:#f2f2f2; }
+body.dark th { background:#2563eb; color:#fff; }
+body.dark td { border-color:#374151; }
+body.dark tr:nth-child(even){ background:#1f2937; }
 
 .last-order { background:#FFF59D !important; font-weight:bold; }
 
@@ -130,9 +133,9 @@ let lastOrderNumber = "";
 
 function getToday(){
     const d = new Date();
-    return d.getFullYear().toString().slice(2) + // YY
+    return d.getFullYear().toString().slice(2) +
            String(d.getMonth()+1).padStart(2,'0') +
-           String(d.getDate()).padStart(2,'0'); // MMDD
+           String(d.getDate()).padStart(2,'0');
 }
 
 function generateOrder(){
@@ -162,7 +165,6 @@ function generateOrder(){
     showPopup(orderNumber);
     updateOrdersTable();
 
-    // نسخ الرقم تلقائي بدون popup
     navigator.clipboard.writeText(orderNumber);
 }
 
@@ -176,7 +178,6 @@ function showPopup(num){
 function copyOrder(){
     if(!lastOrderNumber) return;
     navigator.clipboard.writeText(lastOrderNumber);
-    // بدون أي popup، الأنيميشن الزرار نفسه يفضل شغال
 }
 
 function updateOrdersTable(){
@@ -263,36 +264,20 @@ document.getElementById("amount").addEventListener("keydown", function(e){
 });
 
 updateOrdersTable();
-</script>
 
-<script>
-// استقبال الرسائل من الصفحة الأم لتغيير الثيم
+// =========================
+// Dark Mode مباشر من Tools Hub
+// =========================
 window.addEventListener("message", (event) => {
-    if(event.data.theme){
-        if(event.data.theme === 'dark'){
-            document.documentElement.setAttribute("data-theme","dark");
+    if(event.data.dark !== undefined){
+        if(event.data.dark){
+            document.body.classList.add("dark");
         } else {
-            document.documentElement.removeAttribute("data-theme");
+            document.body.classList.remove("dark");
         }
     }
 });
-
-// طلب الثيم الحالي من الصفحة الرئيسية عند فتح الأداة
-if(window.parent){
-    window.parent.postMessage({requestTheme:true}, '*');
-}
-
-// استجابة لطلب الصفحة الرئيسية (لو فيه requestTheme)
-window.addEventListener("message", (event) => {
-    if(event.data.requestTheme){
-        const isDark = window.parent.document.body.classList.contains('dark');
-        window.parent.postMessage({theme: isDark?'dark':'light'}, '*');
-    }
-});
 </script>
-
 
 </body>
 </html>
-
-
